@@ -1,6 +1,8 @@
 package com.groslaids.chatapp.database;
 
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.groslaids.chatapp.Model.Users;
 
 /**
  * Created by marc_ on 2017-10-01.
@@ -8,10 +10,10 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class DatabaseProfile {
     private static DatabaseProfile instance;
-    private FirebaseDatabase firebaseDatabase;
+    private DatabaseReference usersDatabase;
 
     private DatabaseProfile() {
-        firebaseDatabase = FirebaseDatabase.getInstance();
+        usersDatabase = FirebaseDatabase.getInstance().getReference("users");
     }
 
     public static DatabaseProfile getInstance() {
@@ -20,5 +22,9 @@ public class DatabaseProfile {
         }
 
         return instance;
+    }
+
+    public void createUser(Users user){
+        usersDatabase.child("users").child(user.uID).setValue(user);
     }
 }

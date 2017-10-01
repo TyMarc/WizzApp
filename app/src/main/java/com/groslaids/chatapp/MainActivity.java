@@ -25,7 +25,7 @@ public class MainActivity extends Activity {
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         //If no user connected
-        if(user == null) {
+        if(user != null) {
             LoginActivity.show(this);
             finish();
         }

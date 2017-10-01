@@ -5,15 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.groslaids.chatapp.Model.Users;
+import com.groslaids.chatapp.database.DatabaseProfile;
 
 public class LoginActivity extends Activity implements View.OnClickListener {
     private static final String TAG = "LoginActivity";
@@ -65,9 +70,13 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                             if(task.isSuccessful()) {
                                 //User created
                                 Log.i(TAG, "User created");
+                                Users newUser = new Users();
+                                newUser.uID = firebaseAuth.getCurrentUser().getUid();
+                                DatabaseProfile.getInstance().createUser(newUser);
                             } else {
                                 //Error
-                                Log.i(TAG, "Error when creating user");
+                                String message = "Failed to create user:"+task.getException().getMessage();
+                                Snackbar.make(emailAddressEditText, message, 2500).show();
                             }
                         }
                     });
@@ -87,6 +96,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                             if(task.isSuccessful()) {
                                 //User logged in
                                 MainActivity.show(LoginActivity.this);
+
                                 finish();
                             } else {
                                 //Error
