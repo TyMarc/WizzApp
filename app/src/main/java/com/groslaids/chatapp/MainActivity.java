@@ -1,18 +1,19 @@
 package com.groslaids.chatapp;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.TextView;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.groslaids.chatapp.adapters.WizzViewPagerAdapter;
 
-public class MainActivity extends Activity {
-    private FirebaseUser user;
+public class MainActivity extends AppCompatActivity {
+    private WizzViewPagerAdapter pagerAdapter;
+    private ViewPager viewPager;
+    private TabLayout tabLayout;
 
     public static void show(Context context) {
         Intent i = new Intent(context, MainActivity.class);
@@ -22,16 +23,19 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        user = FirebaseAuth.getInstance().getCurrentUser();
         //If no user connected
-        if(user != null) {
+        if(FirebaseAuth.getInstance().getCurrentUser() == null) {
             LoginActivity.show(this);
             finish();
         }
 
         setContentView(R.layout.activity_main);
 
-        ((TextView) findViewById(R.id.email_address)).setText(user.getEmail());
+        viewPager = (ViewPager) findViewById(R.id.view_pager);
+        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+
+        pagerAdapter = new WizzViewPagerAdapter(this, getSupportFragmentManager());
+        viewPager.setAdapter(pagerAdapter);
+        tabLayout.setupWithViewPager(viewPager);
     }
 }
