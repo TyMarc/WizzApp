@@ -87,6 +87,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                             if(task.isSuccessful()) {
                                 //User logged in
                                 MainActivity.show(LoginActivity.this);
+                                finish();
                             } else {
                                 //Error
                                 Log.i(TAG, "Error when logging user");
