@@ -6,11 +6,12 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.groslaids.chatapp.adapters.WizzViewPagerAdapter;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private WizzViewPagerAdapter pagerAdapter;
     private ViewPager viewPager;
     private TabLayout tabLayout;
@@ -37,5 +38,15 @@ public class MainActivity extends AppCompatActivity {
         pagerAdapter = new WizzViewPagerAdapter(this, getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
+
+        findViewById(R.id.settings_btn).setOnClickListener(this);
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId()==R.id.settings_btn){
+            //Faire apparaître l'activité de profil
+        }
     }
 }
