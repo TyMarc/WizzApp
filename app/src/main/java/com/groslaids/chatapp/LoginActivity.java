@@ -10,14 +10,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.groslaids.chatapp.Model.Users;
+import com.groslaids.chatapp.model.User;
 import com.groslaids.chatapp.database.DatabaseProfile;
 
 public class LoginActivity extends Activity implements View.OnClickListener {
@@ -70,8 +68,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                             if(task.isSuccessful()) {
                                 //User created
                                 Log.i(TAG, "User created");
-                                Users newUser = new Users();
-                                newUser.uID = firebaseAuth.getCurrentUser().getUid();
+                                User newUser = new User();
+                                newUser.uid = firebaseAuth.getCurrentUser().getUid();
                                 DatabaseProfile.getInstance().createUser(newUser);
                             } else {
                                 //Error
@@ -95,8 +93,10 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()) {
                                 //User logged in
+                                User newUser = new User();
+                                newUser.uid = firebaseAuth.getCurrentUser().getUid();
+                                DatabaseProfile.getInstance().createUser(newUser);
                                 MainActivity.show(LoginActivity.this);
-
                                 finish();
                             } else {
                                 //Error
