@@ -46,7 +46,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if(v.getId()==R.id.settings_btn){
-            //Faire apparaître l'activité de profil
+            //ToDo show profile
+            FirebaseAuth.getInstance().signOut();
+            LoginActivity.show(this);
+            finish();
         }
     }
 }

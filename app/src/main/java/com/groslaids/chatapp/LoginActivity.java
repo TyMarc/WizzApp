@@ -68,9 +68,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                             if(task.isSuccessful()) {
                                 //User created
                                 Log.i(TAG, "User created");
-                                User newUser = new User();
-                                newUser.uid = firebaseAuth.getCurrentUser().getUid();
-                                DatabaseProfile.getInstance().createUser(newUser);
+                                DatabaseProfile.getInstance().createUser(firebaseAuth.getCurrentUser().getUid());
                             } else {
                                 //Error
                                 String message = "Failed to create user:"+task.getException().getMessage();
@@ -93,9 +91,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()) {
                                 //User logged in
-                                User newUser = new User();
-                                newUser.uid = firebaseAuth.getCurrentUser().getUid();
-                                DatabaseProfile.getInstance().createUser(newUser);
+                                DatabaseProfile.getInstance().initMyUser();
                                 MainActivity.show(LoginActivity.this);
                                 finish();
                             } else {

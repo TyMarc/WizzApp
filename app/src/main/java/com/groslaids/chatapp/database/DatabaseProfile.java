@@ -1,8 +1,10 @@
 package com.groslaids.chatapp.database;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -17,6 +19,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.groslaids.chatapp.model.Device;
 import com.groslaids.chatapp.model.User;
+import com.groslaids.chatapp.tools.AvatarGenerator;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * Created by marc_ on 2017-10-01.
@@ -33,10 +38,7 @@ public class DatabaseProfile {
     private DatabaseProfile(final Context context) {
         this.context = context;
         usersDatabase = FirebaseDatabase.getInstance().getReference("users");
-        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
-            getMyUser();
-            addProfileEventListener();
-        }
+        initMyUser();
     }
 
     public static void init(final Context context) {
@@ -51,15 +53,20 @@ public class DatabaseProfile {
         return instance;
     }
 
+    public void initMyUser() {
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            addProfileEventListener();
+        }
+    }
+
     private void addProfileEventListener() {
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Log.i(TAG, "addProfileEventListener: uid=" + uid);
         usersDatabase.child(uid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
                 user = dataSnapshot.getValue(User.class);
-
+                addFCMToken(context);
                 Log.d(TAG, "User name: " + user.userName + ", email " + user.email);
             }
 
@@ -71,46 +78,31 @@ public class DatabaseProfile {
         });
     }
 
-    public void getMyUser() {
-        final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        Log.i(TAG, "Finding user");
-        usersDatabase.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.i(TAG, "Found user");
-                user = dataSnapshot.getValue(User.class);
-                addFCMToken(context);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.i(TAG, "Error while finding user: error=" + databaseError.getMessage());
-            }
-        });
-    }
-
-    public void createUser(User user){
-        this.user = user;
-        usersDatabase.child(user.uid).setValue(user);
+    public void createUser(final String uid){
+        user = new User();
+        user.uid = uid;
+        Bitmap bitmap = AvatarGenerator.generate(context, 50, 50);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        user.thumbnailBase64 = Base64.encodeToString(stream.toByteArray(), Base64.DEFAULT);
+        usersDatabase.child(uid).setValue(user);
         addProfileEventListener();
-        addFCMToken(context);
     }
 
     public void addFCMToken(final Context context) {
-        FirebaseApp.getInstance().getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+        FirebaseApp.getInstance().getToken(false).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
             @Override
             public void onComplete(@NonNull Task<GetTokenResult> task) {
                 if (task.isSuccessful()) {
+                    final String token = task.getResult().getToken();
                     String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-                    Device device = new Device();
-                    device.deviceId = deviceId;
-                    device.fcmToken = task.getResult().getToken();
-                    user.addDevice(device);
-                    usersDatabase.child(user.uid).child("devices").setValue(user.devices);
+                    Log.i(TAG, "onFCMFetchSuccessful");
+                    if (user.hasFcmTokenChanged(deviceId, token)) {
+                        Log.i(TAG, "onFCMFetchSuccessful: user.devices=" + user.devices.size());
+                        usersDatabase.child(user.uid).child("devices").setValue(user.devices);
+                    }
                 }
             }
         });
     }
-
-
 }

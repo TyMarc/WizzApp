@@ -5,6 +5,6 @@ package com.groslaids.chatapp.model;
  */
 
 public class Device {
-    public String fcmToken;
     public String deviceId;
+    public String fcmToken;
 }
